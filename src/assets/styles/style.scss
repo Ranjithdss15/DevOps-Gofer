@@ -1,6 +1,7 @@
 * {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
 html,
@@ -22,7 +23,7 @@ body{
     .app-container{
         display: flex;
         flex-direction: column;
-        min-height: 800px;
+        height: 90%;
         min-width: 400px;
         .header-area{
             text-align: center;
@@ -79,7 +80,14 @@ body{
                     height: 100%;
                     .ant-card-body{
                         height: calc(100% - 65px);
-                        
+                        .react-monaco-editor-container {
+                            .monaco-editor {
+                                height: 100% !important;
+                                > div {
+                                    height: 100% !important;
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -90,9 +98,21 @@ body{
                     height: 100%;
                     .ant-card-body{
                         padding: 10px 0 0;
-                        .sidebar-option-list{
-                            border: none;
+                        height: calc(100% - 65px);
+                        position: relative;
+                        .list-box {
+                            position: absolute;
+                            top: 42px;
+                            left: 0;
+                            right: 0;
+                            bottom: 0;
+                            overflow-y: auto;
+                            padding-bottom: 30px;
+                            .sidebar-option-list{
+                                border: none;
+                            }
                         }
+                        
                     }
                 }
             }

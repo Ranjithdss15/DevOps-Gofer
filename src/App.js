@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   List,
@@ -40,10 +40,31 @@ function App() {
     return localStorage.getItem("optionList")
     ? JSON.parse(localStorage.getItem("optionList"))
     : []
-  }
-  const optionList = getOptionList();
+  } 
+  useEffect(()=>{
+    
+      fetch("/Terrafrom-Generator/master/_lrinc12fe.json")
+        .then(res => res.json())
+        .then(
+          (result) => {
+            if(result) {
+              updateOption(result);
+              updateGeneratedCode(result);
+            }else {
+              alert('Error on Fetching Template');
+            }
+          },
+         (error) => {
+            alert('Error on Fetching Template');
+          }
+        )
+    
+  },[])
+  
+  
+  
   const [form] = Form.useForm();
-  const [optionItem, setOptionItem] = useState(optionList);
+  const [optionItem, setOptionItem] = useState([]);
   const [showOptionDialog, setShowOptionDialog] = useState(false);
   const [generatedCode, setGeneratedCode] = useState();
   const [editedVal, setEditedVal] = useState();
@@ -198,7 +219,7 @@ function App() {
             <span>Terraform Generator</span>
           </header>
           <div className="view-sample-block">
-            <a href="https://github.com/kalaiarasan33/Terrafrom-Generator/blob/master/_lrinc12fe.json" target="_blank" className="tf-sample-link">Download Template Dump</a>
+            <a href="https://github.com/kalaiarasan33/Terrafrom-Generator/blob/master/_lrinc12fe.json" target="_blank" className="tf-sample-link" rel="noopener noreferrer">Download Template Dump</a>
           </div>
           <section className="section-area">
             
@@ -266,7 +287,7 @@ function App() {
                     />
                   </Col>
                 </Row>
-
+                <div className="list-box">
                 <List
                   size="large"
                   dataSource={optionItem}
@@ -287,6 +308,8 @@ function App() {
                     </List.Item>
                   )}
                 />
+                </div>
+                
               </Card>
             </div>
 
