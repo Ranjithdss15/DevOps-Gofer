@@ -43,7 +43,7 @@ function App() {
   } 
   useEffect(()=>{
     
-      fetch("/Terrafrom-Generator/master/_lrinc12fe.json")
+      fetch("/Terrafrom-Generator/master/dump.json")
         .then(res => res.json())
         .then(
           (result) => {
@@ -219,7 +219,7 @@ function App() {
             <span>DevOps Gofer</span>
           </header>
           <div className="view-sample-block">
-            <a href="https://github.com/kalaiarasan33/Terrafrom-Generator/blob/master/_lrinc12fe.json" target="_blank" className="tf-sample-link" rel="noopener noreferrer">Download Template Dump</a>
+            <a href="https://github.com/kalaiarasan33/Terrafrom-Generator/blob/master/dump.json" target="_blank" className="tf-sample-link" rel="noopener noreferrer">Download Template Dump</a>
           </div>
           <section className="section-area">
             
