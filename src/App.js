@@ -18,7 +18,7 @@ import {
 import { PlusOutlined, ExportOutlined, UploadOutlined } from "@ant-design/icons";
 import MonacoEditor from "react-monaco-editor";
 
-import terrFormLogo from "./assets/img/terraform-logo.png";
+import dgLogo from "./assets/img/dg.png";
 import _ from "underscore";
 function App() {
   const { Search } = Input;
@@ -169,7 +169,7 @@ function App() {
     var url = URL.createObjectURL(blob);
 
     var a = document.createElement("a");
-    a.download = `${uniqID()}.json`;
+    a.download = `dump.json`;
     a.href = url;
     a.click();
   };
@@ -215,8 +215,8 @@ function App() {
       <div className="app-wrapper">
         <div className="app-container">
           <header className="header-area">
-            <img src={terrFormLogo} alt="Terraform Logo" />
-            <span>Terraform Generator</span>
+            <img src={dgLogo} alt="Devops Gofer Logo" />
+            <span>DevOps Gofer</span>
           </header>
           <div className="view-sample-block">
             <a href="https://github.com/kalaiarasan33/Terrafrom-Generator/blob/master/_lrinc12fe.json" target="_blank" className="tf-sample-link" rel="noopener noreferrer">Download Template Dump</a>
