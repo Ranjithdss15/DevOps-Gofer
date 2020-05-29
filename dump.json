@@ -10,5 +10,41 @@
     "code": "resource \"aws_organizations_policy\" \"ScpPolicy1\" {\r\n  name = \"scp_root_account\"\r\n  description = \"This SCP prevents restricts the root user in an AWS account from taking any action, either directly as a command or through the console. \"\r\n  content = <<POLICY\r\n{\r\n  \"Version\": \"2012-10-17\",\r\n  \"Statement\": [\r\n    {\r\n      \"Action\": \"*\",\r\n      \"Resource\": \"*\",\r\n      \"Effect\": \"Deny\",\r\n      \"Condition\": {\r\n        \"StringLike\": {\r\n          \"aws:PrincipalArn\": [\r\n            \"arn:aws:iam::*:root\"\r\n          ]\r\n        }\r\n      }\r\n    }\r\n  ]\r\n}\r\nPOLICY\r\n\r\n}",
     "id": "_hxv8jy3c3",
     "isChecked": true
+  },
+  {
+    "oname":"EC2 instance",
+    "code":"resource \"aws_instance\" \"<stack name>\" {\r\n  ami           = \"${data.aws_ami.ubuntu.id}\"\r\n  instance_type = \"t2.micro\"\r\n\r\n  tags = {\r\n    Name = \"<stack name>\"\r\n  }\r\n}",
+    "id":"_lxivum15x",
+    "isChecked":false
+  },
+  {
+    "oname":"Application LoadBalancer w TargetGroups",
+    "code":"resource \"aws_lb\" \"stack-lb\" {\r\n  name = \"${var.stack_id}\"\r\n  load_balancer_type = \"application\"\r\n  internal = true\r\n  subnets = [\"${<subnet-id>}\"]\r\n  idle_timeout = 60\r\n  enable_cross_zone_load_balancing = true\r\n\r\n  tags {\r\n    StackId = \"${var.stack_id}\"\r\n  }\r\n}\r\n\r\nresource \"aws_lb_target_group\" \"stack-target-group\" {\r\n  name = \"${var.stack_id}\"\r\n  protocol = \"HTTP\"\r\n  port = 8080\r\n  vpc_id = \"${<vpc.primary.id>}\"\r\n  target_type = \"ip\"\r\n\r\n  stickiness {\r\n    enabled = false\r\n    type = \"lb_cookie\"\r\n  }\r\n\r\n  health_check {\r\n    protocol = \"HTTP\"\r\n    path = \"/\"\r\n    healthy_threshold = 3\r\n    unhealthy_threshold = 3\r\n    matcher = \"200-399\"\r\n  } \r\n\r\n  depends_on = [\"aws_lb.stack-lb\"]\r\n}\r\n\r\nresource \"aws_lb_target_group\" \"smoke-target-group\" {\r\n  name_prefix = \"smoke-\"\r\n  protocol = \"HTTP\"\r\n  port = 8080\r\n  vpc_id = \"<default vpc id>\"\r\n  target_type = \"ip\"\r\n\r\n  health_check {\r\n    protocol = \"HTTP\"\r\n    path = \"/\"\r\n    healthy_threshold = 2\r\n    unhealthy_threshold = 2\r\n    matcher = \"200-399\"\r\n  }\r\n\r\n  depends_on = [\"aws_lb.stack-lb\"]\r\n}\r\n\r\nresource \"aws_lb_listener\" \"stack-lb-listener\" {\r\n  load_balancer_arn = \"${aws_lb.stack-lb.arn}\"\r\n  port = \"443\"\r\n  protocol = \"HTTPS\"\r\n  ssl_policy        = \"ELBSecurityPolicy-TLS-1-2-2017-01\"\r\n  certificate_arn   = \"<certificate arn>\"\r\n\r\n  default_action {\r\n    target_group_arn = \"${aws_lb_target_group.stack-target-group.arn}\"\r\n    type = \"forward\"\r\n  }\r\n}",
+    "id":"_p8gpx9ozu",
+    "isChecked":false
+  },
+  {
+    "oname":"S3 bucket with policy",
+    "code":"resource \"aws_s3_bucket\" \"<stack_id>\" {\r\n  bucket = \"<unique-bucket-name>\"\r\n  region = \"us-east-1\"\r\n  acl = \"private\"\r\n  tags {\r\n    Owner = \"owner name\"\r\n    StackId = \"${var.stack_id}\"\r\n  }\r\n}\r\n\r\nresource \"aws_s3_bucket_policy\" \"$<stack_id>-policy\" {\r\n  bucket = \"${aws_s3_bucket.<stack_id>.id}\"\r\n  policy = <<POLICY\r\n{\r\n    \"Version\": \"2012-10-17\",\r\n    \"Statement\": [\r\n        {\r\n            \"Effect\": \"Allow\",\r\n            \"Principal\": {\r\n                \"AWS\": [\r\n                          \"<arn of the role which needs permission>\"\r\n                        ]\r\n            },\r\n            \"Action\": [\"s3:Get*\",\"s3:List*\"],\r\n            \"Resource\": [\r\n                \"arn:aws:s3:::<unique-bucket-name>\",\r\n                \"arn:aws:s3:::<unique-bucket-name>/*\"\r\n            ]\r\n        }\r\n    ]\r\n}\r\nPOLICY\r\n}",
+    "id":"_fl8x8w0bj",
+    "isChecked":false
+  },
+  {
+    "oname":"Lambda",
+    "code":"resource \"aws_lambda_function\" \"<stack_id>-lambda\" {\r\n  function_name = \"${var.stack_id}-lambda\"\r\n  handler = \"<handler_name>\"\r\n  runtime = \"java8\"\r\n  timeout = \"180\"\r\n  s3_bucket = \"<your-S3-bucket-name>\"\r\n  s3_key    = \"<your-S3-bucket-name>/latest.zip\"\r\n  role = \"<arn-of-lambda-role>\"\r\n  memory_size = 3008\r\n\r\n  tags {\r\n    Owner = \"owner-name\"\r\n    StackId = \"${var.stack_id}\"\r\n  }\r\n\r\n  environment {\r\n    variables = {\r\n      key = \"value\"\r\n    }\r\n  }\r\n\r\n  vpc_config {\r\n    subnet_ids = [\r\n      \"<sudnet-id>\"]\r\n    security_group_ids = [\r\n      \"<security_group_id>\"]\r\n  }\r\n}",
+    "id":"_d36tuo498",
+    "isChecked":false
+  },
+  {
+    "oname":"Security Group",
+    "code":"resource \"aws_security_group\" \"<stack_id>-sg\" {\r\n  name = \"${var.stack_id}_task\"\r\n  description = \"Allow all inbound traffic\"\r\n  vpc_id = \"<vpc.primary.id>\"\r\n\r\n  egress {\r\n    from_port = 0\r\n    to_port = 0\r\n    protocol = \"-1\"\r\n    cidr_blocks = [\"0.0.0.0/0\"]\r\n  }\r\n}\r\n\r\nresource \"aws_security_group_rule\" \"ecs_task_sg_ingress\" {\r\n  type        = \"ingress\"\r\n  from_port   = 0\r\n  to_port     = 8443\r\n  protocol    = \"tcp\"\r\n  cidr_blocks = [\"10.0.0.0/8\"]\r\n  security_group_id = \"<aws_security_group_id>\"\r\n}",
+    "id":"_q3pqbd9o6",
+    "isChecked":false
+  },
+  {
+    "oname":"IAM role with Inline Policy",
+    "code":"\r\nresource \"aws_iam_role\" \"<stack_id>_role\" {\r\n  name = \"${var.stack_id}\",\r\n  assume_role_policy = <<EOF\r\n{\r\n  \"Version\": \"2012-10-17\",\r\n  \"Statement\": [\r\n    {\r\n      \"Effect\": \"Allow\",\r\n      \"Principal\": {\r\n          \"AWS\": \"<arn-to-be-added-in-trusted-relationship>\"\r\n      },\r\n      \"Action\": \"sts:AssumeRole\"\r\n    }\r\n  ]\r\n}\r\n  EOF\r\n}\r\n\r\n\r\nresource \"aws_iam_role_policy\" \"<stack_id>-policy\" {\r\n  name = \"${var.stack_id}-policy\"\r\n  role = \"${aws_iam_role.<stack_id>_role.id}\"\r\n  policy = <<EOF\r\n{\r\n    \"Version\": \"2012-10-17\",\r\n    \"Statement\": [\r\n        {\r\n            \"Effect\": \"Allow\",\r\n            \"Action\": [\r\n                \"<aws_service>:<action>\"\r\n            ],\r\n          \"Resource\": [\r\n            \"<arn-of-the-resource>\"\r\n          ]\r\n        }\r\n    ]\r\n}\r\nEOF\r\n}",
+    "id":"_y17wcsv70",
+    "isChecked":false
   }
 ]
